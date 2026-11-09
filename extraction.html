@@ -60,6 +60,15 @@
             position: relative;
         }
 
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
         label {
             display: block;
             font-size: 0.8rem;
@@ -133,7 +142,6 @@
             margin-top: 20px;
         }
 
-        /* Encadré d'affichage des résultats */
         .result-box {
             display: none;
             margin-top: 25px;
@@ -158,6 +166,17 @@
             justify-content: space-between;
             font-size: 0.85rem;
             margin-bottom: 8px;
+        }
+
+        .result-tariff-type {
+            font-size: 0.75rem;
+            color: #f0e68c;
+            background: #262214;
+            padding: 4px 8px;
+            border-radius: 2px;
+            margin-bottom: 12px;
+            text-align: center;
+            border: 1px solid #332b10;
         }
 
         .result-price {
@@ -211,7 +230,7 @@
             
             <div class="form-group">
                 <label for="pickup">Lieu de prise en charge</label>
-                <input type="text" id="pickup" autocomplete="off" placeholder="Tapez une rue ou une commune (ex: Évry...)" required>
+                <input type="text" id="pickup" autocomplete="off" placeholder="Tapez une rue ou une commune..." required>
                 <div id="pickup-suggestions" class="autocomplete-suggestions" style="display: none;"></div>
             </div>
 
@@ -221,9 +240,15 @@
                 <div id="dropoff-suggestions" class="autocomplete-suggestions" style="display: none;"></div>
             </div>
 
-            <div class="form-group">
-                <label for="date">Date souhaitée (À partir de Mars 2027)</label>
-                <input type="date" id="date" min="2027-03-01" required>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="date">Date souhaitée</label>
+                    <input type="date" id="date" min="2027-03-01" required>
+                </div>
+                <div class="form-group">
+                    <label for="time">Heure</label>
+                    <input type="time" id="time" value="12:00" required>
+                </div>
             </div>
 
             <button type="submit" id="btn-submit" class="btn-tactical">SIMULER LE TARIF</button>
@@ -232,6 +257,7 @@
         <!-- Bloc de résultat brutaliste -->
         <div id="result-box" class="result-box">
             <div class="result-title">// RAPPORT DE SIMULATION</div>
+            <div id="res-tariff-type" class="result-tariff-type">TARIF STANDARD</div>
             <div class="result-line">
                 <span>DISTANCE ESTIMÉE :</span>
                 <span id="res-distance">-- km</span>
@@ -253,7 +279,6 @@
     </footer>
 
     <script>
-        // Variables pour stocker les coordonnées GPS
         let pickupCoords = null;
         let dropoffCoords = null;
 
@@ -283,7 +308,6 @@
                                 div.addEventListener('click', function() {
                                     input.value = feature.properties.label;
                                     
-                                    // Stocke les coordonnées [long, lat]
                                     if (isPickup) {
                                         pickupCoords = feature.geometry.coordinates;
                                     } else {
@@ -311,7 +335,6 @@
         setupAutocomplete('pickup', 'pickup-suggestions', true);
         setupAutocomplete('dropoff', 'dropoff-suggestions', false);
 
-        // Calcul d'itinéraire au clic sur le bouton
         document.getElementById('calc-form').addEventListener('submit', function(e) {
             e.preventDefault();
 
@@ -320,10 +343,15 @@
                 return;
             }
 
+            const timeValue = document.getElementById('time').value; // ex: "08:30"
+            const hour = parseInt(timeValue.split(':')[0]);
+
+            // Définition des heures de pointe (7h-10h et 16h-20h)
+            const isPeakHour = (hour >= 7 && hour < 10) || (hour >= 16 && hour < 20);
+
             const btn = document.getElementById('btn-submit');
             btn.textContent = "CALCUL EN COURS...";
 
-            // Appel OSRM pour calculer la distance routière
             const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${pickupCoords[0]},${pickupCoords[1]};${dropoffCoords[0]},${dropoffCoords[1]}?overview=false`;
 
             fetch(osrmUrl)
@@ -336,16 +364,25 @@
                         const distanceKm = (route.distance / 1000).toFixed(1);
                         const durationMin = Math.round(route.duration / 60);
 
-                        // Formule de calcul
+                        // Grille tarifaire
                         const basePrice = 5.00;
                         const kmRate = 2.00;
                         const minRate = 0.30;
                         const minimumFare = 20.00;
 
                         let totalPrice = basePrice + (distanceKm * kmRate) + (durationMin * minRate);
+
+                        // Majoration heures de pointe (+25%)
+                        let tariffLabelText = "TARIF STANDARD";
+                        if (isPeakHour) {
+                            totalPrice *= 1.25;
+                            tariffLabelText = "TARIF HEURES DE POINTE (+25%)";
+                        }
+
                         if (totalPrice < minimumFare) totalPrice = minimumFare;
 
-                        // Affichage dans le bloc résultat
+                        // Affichage
+                        document.getElementById('res-tariff-type').textContent = tariffLabelText;
                         document.getElementById('res-distance').textContent = `${distanceKm} km`;
                         document.getElementById('res-duration').textContent = `${durationMin} min`;
                         document.getElementById('res-price').textContent = `${totalPrice.toFixed(2)} €`;
