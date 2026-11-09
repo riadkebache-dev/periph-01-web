@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PÉRIPH-01 | Extraction VTC (91)</title>
+    <style>
+        :root {
+            --bg-color: #111110;
+            --card-bg: #1c1c1a;
+            --text-color: #e0e0dc;
+            --accent-yellow: #d4af37;
+            --border-color: #333330;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: monospace, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .nav-back {
+            display: inline-block;
+            color: var(--accent-yellow);
+            text-decoration: none;
+            margin-bottom: 20px;
+            font-size: 0.85rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 1px dashed var(--border-color);
+            padding-bottom: 15px;
+        }
+
+        .notice-box {
+            background-color: #262214;
+            border: 1px solid var(--accent-yellow);
+            color: #f0e68c;
+            padding: 12px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            margin-bottom: 25px;
+            line-height: 1.4;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.8rem;
+            color: #888;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            font-family: monospace;
+            border-radius: 2px;
+            box-sizing: border-box;
+        }
+
+        .btn-tactical {
+            display: block;
+            width: 100%;
+            background-color: var(--accent-yellow);
+            color: #111;
+            text-align: center;
+            padding: 14px 0;
+            font-weight: bold;
+            text-decoration: none;
+            letter-spacing: 1px;
+            border: none;
+            cursor: pointer;
+            border-radius: 2px;
+            text-transform: uppercase;
+            margin-top: 20px;
+        }
+
+        .status-tag {
+            font-size: 0.75rem;
+            color: var(--accent-yellow);
+            background: #222;
+            padding: 2px 6px;
+            border-radius: 2px;
+        }
+
+        footer {
+            border-top: 1px dashed var(--border-color);
+            margin-top: 40px;
+            padding: 20px 0;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #888;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <a href="index.html" class="nav-back">← RETOUR ACCUEIL</a>
+
+        <header>
+            <h2>EXTRACTION VTC</h2>
+            <span class="status-tag">SECTEUR ESSONNE (91)</span>
+        </header>
+
+        <!-- AVERTISSEMENT PRE-LANCEMENT -->
+        <div class="notice-box">
+            <strong>⚠️ PRÉPARATION DE LANCEMENT :</strong><br>
+            Le service PÉRIPH-01 sera officiellement actif en <strong>Mars 2027</strong> dans le 91.<br>
+            Cet outil vous permet de simuler une course à titre indicatif. Aucune commande immédiate n'est requise.
+        </div>
+
+        <form onsubmit="event.preventDefault(); alert('Simulation enregistrée. Ouverture officielle des lignes en Mars 2027.');">
+            <div class="form-group">
+                <label for="pickup">Lieu de prise en charge (Départ 91)</label>
+                <input type="text" id="pickup" placeholder="Ex: Évry, Massy, Sainte-Geneviève..." required>
+            </div>
+
+            <div class="form-group">
+                <label for="dropoff">Destination (Arrivée)</label>
+                <input type="text" id="dropoff" placeholder="Ex: Aéroport d'Orly, Paris..." required>
+            </div>
+
+            <div class="form-group">
+                <label for="date">Date souhaitée (À partir de Mars 2027)</label>
+                <input type="date" id="date" min="2027-03-01" required>
+            </div>
+
+            <button type="submit" class="btn-tactical">SIMULER LE TARIF</button>
+        </form>
+    </div>
+
+    <footer>
+        <p>PÉRIPH-01 // ESSONNE (91) — LANCEMENT MARS 2027</p>
+        <p>CONTACT DIRECT : <a href="mailto:contact@periph-01.fr" style="color: var(--accent-yellow); text-decoration: none;">contact@periph-01.fr</a></p>
+    </footer>
+
+</body>
+</html>
