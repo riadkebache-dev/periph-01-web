@@ -56,7 +56,8 @@
         }
 
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+            position: relative;
         }
 
         label {
@@ -76,6 +77,44 @@
             font-family: monospace;
             border-radius: 2px;
             box-sizing: border-box;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--accent-yellow);
+        }
+
+        /* Menu déroulant autocomplétion brutaliste */
+        .autocomplete-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background-color: var(--card-bg);
+            border: 1px solid var(--accent-yellow);
+            border-top: none;
+            z-index: 99;
+            max-height: 200px;
+            overflow-y: auto;
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.5);
+        }
+
+        .autocomplete-suggestion {
+            padding: 10px 12px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-color);
+        }
+
+        .autocomplete-suggestion:last-child {
+            border-bottom: none;
+        }
+
+        .autocomplete-suggestion:hover {
+            background-color: var(--accent-yellow);
+            color: #111;
+            font-weight: bold;
         }
 
         .btn-tactical {
@@ -124,7 +163,6 @@
             <span class="status-tag">SECTEUR ESSONNE (91)</span>
         </header>
 
-        <!-- AVERTISSEMENT PRE-LANCEMENT -->
         <div class="notice-box">
             <strong>⚠️ PRÉPARATION DE LANCEMENT :</strong><br>
             Le service PÉRIPH-01 sera officiellement actif en <strong>Mars 2027</strong> dans le 91.<br>
@@ -132,14 +170,19 @@
         </div>
 
         <form onsubmit="event.preventDefault(); alert('Simulation enregistrée. Ouverture officielle des lignes en Mars 2027.');">
+            
+            <!-- Champ Prise en charge avec autocomplétion -->
             <div class="form-group">
                 <label for="pickup">Lieu de prise en charge (Départ 91)</label>
-                <input type="text" id="pickup" placeholder="Ex: Évry, Massy, Sainte-Geneviève..." required>
+                <input type="text" id="pickup" autocomplete="off" placeholder="Tapez une rue ou une commune (ex: Évry...)" required>
+                <div id="pickup-suggestions" class="autocomplete-suggestions" style="display: none;"></div>
             </div>
 
+            <!-- Champ Destination avec autocomplétion -->
             <div class="form-group">
                 <label for="dropoff">Destination (Arrivée)</label>
-                <input type="text" id="dropoff" placeholder="Ex: Aéroport d'Orly, Paris..." required>
+                <input type="text" id="dropoff" autocomplete="off" placeholder="Tapez une adresse ou lieu..." required>
+                <div id="dropoff-suggestions" class="autocomplete-suggestions" style="display: none;"></div>
             </div>
 
             <div class="form-group">
@@ -155,6 +198,60 @@
         <p>PÉRIPH-01 // ESSONNE (91) — LANCEMENT MARS 2027</p>
         <p>CONTACT DIRECT : <a href="mailto:contact@periph-01.fr" style="color: var(--accent-yellow); text-decoration: none;">contact@periph-01.fr</a></p>
     </footer>
+
+    <!-- SCRIPT AUTOCOMPLÉTION API ADRESSE GOV -->
+    <script>
+        function setupAutocomplete(inputId, suggestionsId) {
+            const input = document.getElementById(inputId);
+            const suggestionsContainer = document.getElementById(suggestionsId);
+
+            input.addEventListener('input', function() {
+                const query = this.value;
+
+                if (query.length < 3) {
+                    suggestionsContainer.style.display = 'none';
+                    return;
+                }
+
+                // Appel direct et gratuit à l'API du gouvernement français
+                fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(query)}&limit=5`)
+                    .then(response => response.json())
+                    .then(data => {
+                        suggestionsContainer.innerHTML = '';
+                        
+                        if (data.features && data.features.length > 0) {
+                            suggestionsContainer.style.display = 'block';
+                            data.features.forEach(feature => {
+                                const div = document.createElement('div');
+                                div.className = 'autocomplete-suggestion';
+                                div.textContent = feature.properties.label;
+                                div.addEventListener('click', function() {
+                                    input.value = feature.properties.label;
+                                    suggestionsContainer.style.display = 'none';
+                                });
+                                suggestionsContainer.appendChild(div);
+                            });
+                        } else {
+                            suggestionsContainer.style.display = 'none';
+                        }
+                    })
+                    .catch(err => {
+                        console.error("Erreur d'autocomplétion :", err);
+                    });
+            });
+
+            // Masquer les suggestions si l'utilisateur clique ailleurs
+            document.addEventListener('click', function(e) {
+                if (e.target !== input && e.target !== suggestionsContainer) {
+                    suggestionsContainer.style.display = 'none';
+                }
+            });
+        }
+
+        // Activation sur les deux champs d'adresses
+        setupAutocomplete('pickup', 'pickup-suggestions');
+        setupAutocomplete('dropoff', 'dropoff-suggestions');
+    </script>
 
 </body>
 </html>
